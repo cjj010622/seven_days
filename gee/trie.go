@@ -39,7 +39,7 @@ func (n *node) insert(pattern string, parts []string, height int) {
 	part := parts[height]
 	child := n.matchChild(part)
 	if child == nil {
-		child := &node{
+		child = &node{
 			part:   part,
 			isWild: part[0] == ':' || part[0] == '*',
 		}
