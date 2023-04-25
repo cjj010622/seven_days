@@ -1,2 +1,19 @@
 # seven_days
-Store some seven day crash projectsCancel changes
+Gee
+
+将使用 Go 语言实现一个简单的 Web 框架，起名叫做Gee。我第一次接触的 Go 语言的 Web 框架是Gin，Gin的代码总共是14K，其中测试代码9K，也就是说实际代码量只有5K。Gin是我非常喜欢的一个框架，与Python中的Flask很像，小而美。
+
+Gee框架参考了Gin，大家可以看到很多Gin的影子。
+
+时间关系，同时为了尽可能地简洁明了，这个框架中的很多部分实现的功能都很简单，但是尽可能地体现一个框架核心的设计原则。例如Router的设计，虽然支持的动态路由规则有限，但为了性能考虑匹配算法是用Trie树实现的，Router最重要的指标之一便是性能。
+
+GeeCache
+
+基本上模仿了 groupcache 的实现，为了将代码量限制在 500 行左右（groupcache 约 3000 行），裁剪了部分功能。但总体实现上，还是与 groupcache 非常接近的。支持特性有：
+
+单机缓存和基于 HTTP 的分布式缓存
+最近最少访问(Least Recently Used, LRU) 缓存策略
+使用 Go 锁机制防止缓存击穿
+使用一致性哈希选择节点，实现负载均衡
+使用 protobuf 优化节点间二进制通信
+…
