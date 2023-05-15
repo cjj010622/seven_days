@@ -1,36 +1,49 @@
 package main
 
 import (
-	"gee"
+	"encoding/json"
+	"fmt"
+	"gee_rpc"
+	"gee_rpc/codec"
 	"log"
-	"net/http"
+	"net"
+	_ "net/http"
 	"time"
 )
 
-func onlyForV2() gee.HandlerFunc {
-	return func(c *gee.Context) {
-		// Start timer
-		t := time.Now()
-		// Calculate resolution time
-		log.Printf("[%d] %s in %v for group v2", c.StatusCode, c.Req.RequestURI, time.Since(t))
+func startServer(addr chan string) {
+	// pick a free port
+	l, err := net.Listen("tcp", ":0")
+	if err != nil {
+		log.Fatal("network error:", err)
 	}
+	log.Println("start rpc server on", l.Addr())
+	addr <- l.Addr().String()
+	gee_rpc.Accept(l)
 }
 
 func main() {
-	r := gee.New()
-	r.Use(gee.Logger()) // global midlleware
-	r.GET("/", func(c *gee.Context) {
-		c.HTML(http.StatusOK, "<h1>Hello Gee</h1>")
-	})
+	addr := make(chan string)
+	go startServer(addr)
 
-	v2 := r.Group("/v2")
-	v2.Use(onlyForV2()) // v2 group middleware
-	{
-		v2.GET("/hello/:name", func(c *gee.Context) {
-			// expect /hello/geektutu
-			c.String(http.StatusOK, "hello %s, you're at %s\n", c.Param("name"), c.Path)
-		})
+	// in fact, following code is like a simple gee_rpc client
+	conn, _ := net.Dial("tcp", <-addr)
+	defer func() { _ = conn.Close() }()
+
+	time.Sleep(time.Second)
+	// send options
+	_ = json.NewEncoder(conn).Encode(gee_rpc.DefaultOption)
+	cc := codec.NewGobCodec(conn)
+	// send request & receive response
+	for i := 0; i < 5; i++ {
+		h := &codec.Header{
+			ServiceMethod: "Foo.Sum",
+			Seq:           uint64(i),
+		}
+		_ = cc.Write(h, fmt.Sprintf("gee_rpc req %d", h.Seq))
+		_ = cc.ReadHeader(h)
+		var reply string
+		_ = cc.ReadBody(&reply)
+		log.Println("reply:", reply)
 	}
-
-	r.Run(":9999")
 }
