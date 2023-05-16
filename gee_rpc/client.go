@@ -71,7 +71,7 @@ func (client *Client) RegisterCall(call *Call) (uint64, error) {
 
 func (client *Client) RemoveCall(seq uint64) *Call {
 	client.mu.Lock()
-	client.mu.Unlock()
+	defer client.mu.Unlock()
 	call := client.pending[seq]
 	delete(client.pending, seq)
 	return call
@@ -90,7 +90,7 @@ func (client *Client) terminateCalls(err error) {
 	}
 }
 
-// 接受请求并解析，分为三种情况
+// 接受服务端返回的请求并解析，分为三种情况
 func (client *Client) receive() {
 	var err error
 	for err == nil {
@@ -221,7 +221,7 @@ func (client *Client) Go(serviceMethod string, argv, reply interface{}, done cha
 }
 
 // Call 封装Go 同步
-func (client *Client) Call(serviceMethod string, argv, reply interface{}, done chan *Call) *Call {
+func (client *Client) Call(serviceMethod string, argv, reply interface{}) error {
 	call := <-client.Go(serviceMethod, argv, reply, make(chan *Call, 1)).Done
-	return call
+	return call.Error
 }
