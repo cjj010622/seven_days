@@ -1,7 +1,7 @@
 # seven_days
 Gee
 
-将使用 Go 语言实现一个简单的 Web 框架，起名叫做Gee。我第一次接触的 Go 语言的 Web 框架是Gin，Gin的代码总共是14K，其中测试代码9K，也就是说实际代码量只有5K。Gin是我非常喜欢的一个框架，与Python中的Flask很像，小而美。
+将使用 Go 语言实现一个简单的 Web 框架，实际代码量只有5K。Gin是我非常喜欢的一个框架，与Python中的Flask很像，小而美。
 
 Gee框架参考了Gin，大家可以看到很多Gin的影子。
 
